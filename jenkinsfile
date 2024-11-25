@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'hello-world-app'  // Название Docker-образа
-        DOCKER_REGISTRY = 'localhost'  // Локальный Docker (если не используем Docker Hub)
+        IMAGE_NAME = 'hello-world-app'
+        DOCKER_IMAGE = 'hello-world-app:latest'
     }
 
     stages {
@@ -16,20 +16,21 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Строим Docker-образ
                 script {
-                    sh 'docker build -t ${IMAGE_NAME}:latest .'
+                    // Сборка Docker-образа
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
                 }
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                // Запуск Docker контейнера с приложением
                 script {
-                    sh 'docker stop ${IMAGE_NAME} || true'
-                    sh 'docker rm ${IMAGE_NAME} || true'
-                    sh 'docker run -d --name ${IMAGE_NAME} -p 8080:80 ${IMAGE_NAME}:latest'
+                    // Остановка и удаление старого контейнера, если существует
+                    sh "docker stop ${IMAGE_NAME} || true"
+                    sh "docker rm ${IMAGE_NAME} || true"
+                    // Запуск нового контейнера
+                    sh "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
                 }
             }
         }
