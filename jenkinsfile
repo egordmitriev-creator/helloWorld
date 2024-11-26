@@ -18,20 +18,22 @@ pipeline {
             steps {
                 script {
                     // Сборка Docker-образа
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    sh "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Deploy Docker Container') {
             steps {
                 script {
-                    // Остановка и удаление старого контейнера, если существует
-                    sh "docker stop ${IMAGE_NAME} || true"
-                    sh "docker rm ${IMAGE_NAME} || true"
-                    // Запуск нового контейнера
-                    // Сборка Docker-образа
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    // Проверяем, существует ли контейнер, и удаляем его, если нужно
+                    sh """
+                        if [ \$(docker ps -aq -f name=${IMAGE_NAME}) ]; then
+                            docker stop ${IMAGE_NAME}
+                            docker rm ${IMAGE_NAME}
+                        fi
+                    """
+                    // Запускаем новый контейнер
                     sh "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
                 }
             }
