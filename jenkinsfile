@@ -27,20 +27,6 @@ pipeline {
         stage('Deploy Docker Container') {
             steps {
                 script {
-                    // Проверяем и останавливаем старый контейнер
-                    sh """
-                        if [ \$(docker ps -aq -f name=${IMAGE_NAME}) ]; then
-                            docker stop ${IMAGE_NAME}
-                            docker rm ${IMAGE_NAME}
-                        fi
-                    """
-                    // Освобождаем порт, если он занят
-                    sh """
-                        if ss -tuln | grep :${PORT}; then
-                            echo "Port ${PORT} is in use. Freeing it..."
-                            fuser -k ${PORT}/tcp || true
-                        fi
-                    """
                     // Запускаем новый контейнер
                     sh "docker run -d --name ${IMAGE_NAME} -p 8181:80 ${DOCKER_IMAGE}"
                 }
