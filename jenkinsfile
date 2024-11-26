@@ -27,7 +27,7 @@ pipeline {
         stage('Deploy Docker Container') {
             steps {
                 script {
-                    // Проверяем, существует ли контейнер, и удаляем его, если нужно
+                    // Проверяем и останавливаем старый контейнер
                     sh """
                         if [ \$(docker ps -aq -f name=${IMAGE_NAME}) ]; then
                             docker stop ${IMAGE_NAME}
@@ -36,7 +36,8 @@ pipeline {
                     """
                     // Освобождаем порт, если он занят
                     sh """
-                        if lsof -i :${PORT}; then
+                        if ss -tuln | grep :${PORT}; then
+                            echo "Port ${PORT} is in use. Freeing it..."
                             fuser -k ${PORT}/tcp || true
                         fi
                     """
