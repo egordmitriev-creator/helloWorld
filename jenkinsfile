@@ -30,6 +30,8 @@ pipeline {
                     sh "docker stop ${IMAGE_NAME} || true"
                     sh "docker rm ${IMAGE_NAME} || true"
                     // Запуск нового контейнера
+                    // Сборка Docker-образа
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
                     sh "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
                 }
             }
